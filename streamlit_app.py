@@ -196,7 +196,7 @@ html = r'''
       <div class="control-row">
         <div class="label-group">
           <label for="speedRange">Speed</label>
-          <span class="metric">px / frame</span>
+          <span class="metric">px / frame (60fps)</span>
         </div>
         <input id="speedRange" type="range" min="0.5" max="20" step="0.1" value="3" aria-label="Speed Slider">
         <input id="speedNum" type="number" min="0.5" max="20" step="0.1" value="3" aria-label="Exact Speed">
