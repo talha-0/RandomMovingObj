@@ -1,7 +1,7 @@
 """
 Streamlit application that embeds a full-viewport p5.js animation.
 Features randomly moving shapes with dynamic rotations, a visual shape selector, 
-and a modern glassmorphism control panel with native fullscreen support.
+and a modern glassmorphism control panel with native fullscreen and exit support.
 """
 
 import streamlit as st
@@ -67,7 +67,7 @@ html = r'''
         position: fixed;
         right: 20px;
         top: 20px;
-        width: 330px;
+        width: 340px;
         max-width: 85vw;
         z-index: 9999;
         padding: 20px;
@@ -121,7 +121,6 @@ html = r'''
       button.primary { background: linear-gradient(135deg,#27e58a,#0fb39b); color: #052018; font-weight:700; border: none; }
       button.primary:hover { box-shadow: 0 4px 12px rgba(39, 229, 138, 0.3); }
       button.danger:hover { background: rgba(235, 87, 87, 0.8); color: white; border-color: transparent;}
-      button.fullscreen-btn { width: 100%; margin-top: 4px; background: rgba(255,255,255,0.1); }
       
       .checkbox-row { display:flex; align-items:center; justify-content: flex-start; gap:8px; color:#cfe8ff; font-size:14px; margin-top: 16px;}
       .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #27e58a; }
@@ -148,7 +147,11 @@ html = r'''
         <button id="stopBtn" class="std-btn danger" aria-label="Stop">Stop</button>
         <button id="resetBtn" class="std-btn" aria-label="Reset">Reset</button>
       </div>
-      <button id="fullscreenBtn" class="std-btn fullscreen-btn" aria-label="Toggle Fullscreen">⛶ Toggle Fullscreen</button>
+      
+      <div style="display: flex; gap: 8px; margin-top: 4px;">
+        <button id="fullscreenBtn" class="std-btn" style="background: rgba(255,255,255,0.1);" aria-label="Toggle Fullscreen">⛶ Fullscreen</button>
+        <button id="exitBtn" class="std-btn danger" aria-label="Exit Application">⏻ Exit App</button>
+      </div>
 
       <div class="control-col">
         <label>Shape</label>
@@ -337,6 +340,12 @@ html = r'''
       function drawDot() {
         push();
         translate(dot.x, dot.y);
+        
+        // Orient specific shapes (Arrow) to face the direction of travel
+        if (config.shape === 'triangle') {
+          rotate(dot.angle + PI / 2);
+        }
+
         noStroke();
         fill(config.color);
         const size = config.dot_size;
@@ -352,8 +361,7 @@ html = r'''
           rectMode(CENTER);
           rect(0, 0, size, size, size * 0.25); 
         } else if (config.shape === 'triangle') {
-          rotate(dot.angle); // Strictly rotate to point in the current travel direction
-          triangle(size / 2, 0, -size / 2, -size / 2.5, -size / 2, size / 2.5);
+          triangle(0, -size / 1.5, -size / 2, size / 2, size / 2, size / 2);
         } else if (config.shape === 'star') {
           rotate(millis() / 1000.0); // Continuous tumbling
           drawStar(0, 0, size / 2.5, size, 5);
@@ -426,6 +434,7 @@ html = r'''
         const stopBtn = document.getElementById('stopBtn');
         const resetBtn = document.getElementById('resetBtn');
         const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const exitBtn = document.getElementById('exitBtn');
         const shapeBtns = document.querySelectorAll('.shape-btn');
         const speedRange = document.getElementById('speedRange');
         const sizeRange = document.getElementById('sizeRange');
@@ -447,6 +456,24 @@ html = r'''
             });
           } else {
             document.exitFullscreen();
+          }
+        };
+
+        // NEW: Handle native Pywebview Window Exit
+        exitBtn.onclick = () => {
+          try {
+            if (window.parent && window.parent.pywebview && window.parent.pywebview.api) {
+              window.parent.pywebview.api.exit_app();
+            } else if (window.top && window.top.pywebview && window.top.pywebview.api) {
+              window.top.pywebview.api.exit_app();
+            } else if (window.pywebview && window.pywebview.api) {
+              window.pywebview.api.exit_app();
+            } else {
+              console.warn("Pywebview API not found. Closing normal browser window.");
+              window.close();
+            }
+          } catch (e) {
+            console.error("Error communicating with Python backend:", e);
           }
         };
 
