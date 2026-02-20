@@ -1,7 +1,7 @@
 """
 Streamlit application that embeds a full-viewport p5.js animation.
 Features randomly moving shapes with dynamic rotations, a visual shape selector, 
-and a modern glassmorphism control panel with native fullscreen and exit support.
+and a modern glassmorphism control panel with synced numeric/slider inputs and native fullscreen/exit support.
 """
 
 import streamlit as st
@@ -67,7 +67,7 @@ html = r'''
         position: fixed;
         right: 20px;
         top: 20px;
-        width: 340px;
+        width: 350px;
         max-width: 85vw;
         z-index: 9999;
         padding: 20px;
@@ -94,7 +94,13 @@ html = r'''
       .controls h3 { margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px; }
       .control-row { display: flex; gap: 12px; align-items:center; margin: 12px 0; justify-content: space-between; }
       .control-col { display: flex; flex-direction: column; width: 100%; gap: 8px; margin: 16px 0; }
-      .control-row label, .control-col label { min-width: 95px; font-size: 14px; font-weight: 500; color:#cdd9ed; }
+      
+      /* Updated Labels & Metrics layout for Numeric inputs */
+      .label-group { display: flex; flex-direction: column; min-width: 85px; }
+      .label-group label { font-size: 14px; font-weight: 500; color:#cdd9ed; }
+      .metric { font-size: 11px; color: #8fa8c7; font-weight: 400; margin-top: 2px;}
+      .control-col label { font-size: 14px; font-weight: 500; color:#cdd9ed; }
+      
       .control-row input[type="range"] { flex-grow: 1; cursor: pointer; }
       .btn-row { display:flex; gap:8px; margin-bottom: 8px; }
       .footer-note { margin-top:16px; font-size:12px; color:#8fa8c7; opacity:0.8; line-height: 1.4; }
@@ -125,10 +131,31 @@ html = r'''
       .checkbox-row { display:flex; align-items:center; justify-content: flex-start; gap:8px; color:#cfe8ff; font-size:14px; margin-top: 16px;}
       .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #27e58a; }
 
+      /* Input Stylings */
       input[type="range"] { -webkit-appearance: none; background: transparent; }
       input[type="range"]::-webkit-slider-runnable-track { background: rgba(255,255,255,0.15); height:6px; border-radius:6px; }
       input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#27e58a; box-shadow:0 0 8px rgba(0,0,0,0.4); margin-top:-5px; transition: transform 0.1s; }
       input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+      /* Exact Number Input Box */
+      input[type="number"] {
+        width: 55px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: white;
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-family: inherit;
+        font-size: 13px;
+        text-align: right;
+        outline: none;
+        transition: border-color 0.2s;
+        -moz-appearance: textfield; /* Hides arrows in Firefox */
+      }
+      input[type="number"]:focus { border-color: #27e58a; background: rgba(255,255,255,0.12); }
+      /* Hides arrows in Chrome/Safari/Edge */
+      input[type="number"]::-webkit-inner-spin-button, 
+      input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
       input[type="color"] { -webkit-appearance: none; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; padding: 0; background: transparent; }
       input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
@@ -167,28 +194,40 @@ html = r'''
       </div>
 
       <div class="control-row">
-        <label for="speedRange">Speed</label>
-        <input id="speedRange" type="range" min="0.5" max="20" step="0.1" value="3" aria-label="Speed">
+        <div class="label-group">
+          <label for="speedRange">Speed</label>
+          <span class="metric">px / frame</span>
+        </div>
+        <input id="speedRange" type="range" min="0.5" max="20" step="0.1" value="3" aria-label="Speed Slider">
+        <input id="speedNum" type="number" min="0.5" max="20" step="0.1" value="3" aria-label="Exact Speed">
       </div>
 
       <div class="control-row">
-        <label for="sizeRange">Size</label>
-        <input id="sizeRange" type="range" min="8" max="100" step="1" value="24" aria-label="Shape Size">
+        <div class="label-group">
+          <label for="sizeRange">Size</label>
+          <span class="metric">pixels</span>
+        </div>
+        <input id="sizeRange" type="range" min="8" max="100" step="1" value="24" aria-label="Size Slider">
+        <input id="sizeNum" type="number" min="8" max="100" step="1" value="24" aria-label="Exact Size">
       </div>
 
       <div class="control-row">
-        <label for="pauseRange">Pause (ms)</label>
-        <input id="pauseRange" type="range" min="0" max="2000" step="10" value="350" aria-label="Pause Duration">
+        <div class="label-group">
+          <label for="pauseRange">Pause</label>
+          <span class="metric">milliseconds</span>
+        </div>
+        <input id="pauseRange" type="range" min="0" max="2000" step="10" value="350" aria-label="Pause Slider">
+        <input id="pauseNum" type="number" min="0" max="2000" step="10" value="350" aria-label="Exact Pause">
       </div>
 
       <div class="control-row">
-        <label for="dotColor">Object Color</label>
-        <input type="color" id="dotColor" value="#00ffff" aria-label="Object Color">
+        <div class="label-group"><label for="dotColor">Object Color</label></div>
+        <input type="color" id="dotColor" value="#00ffff" aria-label="Object Color" style="margin-left: auto;">
       </div>
       
       <div class="control-row">
-        <label for="bgColor">Background</label>
-        <input type="color" id="bgColor" value="#2b2b2b" aria-label="Background Color">
+        <div class="label-group"><label for="bgColor">Background</label></div>
+        <input type="color" id="bgColor" value="#2b2b2b" aria-label="Background Color" style="margin-left: auto;">
       </div>
 
       <div class="control-row checkbox-row">
@@ -436,9 +475,15 @@ html = r'''
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         const exitBtn = document.getElementById('exitBtn');
         const shapeBtns = document.querySelectorAll('.shape-btn');
+        
+        // Ranges and Number Inputs
         const speedRange = document.getElementById('speedRange');
+        const speedNum = document.getElementById('speedNum');
         const sizeRange = document.getElementById('sizeRange');
+        const sizeNum = document.getElementById('sizeNum');
         const pauseRange = document.getElementById('pauseRange');
+        const pauseNum = document.getElementById('pauseNum');
+        
         const dotColorInput = document.getElementById('dotColor');
         const bgColorInput = document.getElementById('bgColor');
         const showBoundary = document.getElementById('showBoundary');
@@ -459,7 +504,7 @@ html = r'''
           }
         };
 
-        // NEW: Handle native Pywebview Window Exit
+        // Handle native Pywebview Window Exit
         exitBtn.onclick = () => {
           try {
             if (window.parent && window.parent.pywebview && window.parent.pywebview.api) {
@@ -486,9 +531,28 @@ html = r'''
           });
         });
 
-        speedRange.oninput = (e) => { config.speed = parseFloat(e.target.value); };
-        sizeRange.oninput = (e) => { config.dot_size = parseInt(e.target.value); };
-        pauseRange.oninput = (e) => { config.pause_ms = parseInt(e.target.value); };
+        /**
+         * Helper to synchronize range sliders and exact number inputs.
+         */
+        function syncInputs(rangeEl, numEl, configKey, isFloat=false) {
+          rangeEl.addEventListener('input', (e) => {
+            let val = isFloat ? parseFloat(e.target.value) : parseInt(e.target.value);
+            config[configKey] = val;
+            numEl.value = val;
+          });
+          numEl.addEventListener('input', (e) => {
+            let val = isFloat ? parseFloat(e.target.value) : parseInt(e.target.value);
+            if (!isNaN(val)) {
+              config[configKey] = val;
+              rangeEl.value = val;
+            }
+          });
+        }
+
+        // Wire up synchronized inputs
+        syncInputs(speedRange, speedNum, 'speed', true);
+        syncInputs(sizeRange, sizeNum, 'dot_size', false);
+        syncInputs(pauseRange, pauseNum, 'pause_ms', false);
         
         dotColorInput.oninput = (e) => { config.color = e.target.value; };
         bgColorInput.oninput = (e) => { 
