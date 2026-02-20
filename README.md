@@ -1,102 +1,129 @@
 # Random Moving Dot
 
-A smooth animated dot that moves randomly around the screen using Python's built-in `turtle` graphics module.
+An interactive application featuring a smooth animated shape that moves randomly around the screen. 
 
 ---
 
-## Requirements
-# Random Moving Dot
+## Features
 
-A smooth animated dot that moves randomly around the screen using Python's built-in turtle graphics module.
+- **Multiple UI Options**: Run using CustomTkinter (native desktop) or Streamlit (web-based)
+- **Customizable Animation**: Control speed, shape type, and colors
+- **Dynamic Shapes**: Support for circles, squares, and other geometries
+- **Color Picker**: Customize dot and background colors
+- **Frame Rate Display**: Real-time speed feedback in frames per second
 
 ---
 
 ## Requirements
 
 - Python 3.8 or higher
-- `turtle` (included with the standard Python installation)
+- Dependencies listed in `requirements.txt`
 
-No external Python packages are required.
+For CustomTkinter app:
+- customtkinter
+- darkdetect
+- packaging
+
+For Streamlit app:
+- streamlit
 
 ---
 
-## Using a .venv (Recommended)
+## Installation
 
-Create and activate a project-local virtual environment named `.venv` (steps below). Using a `.venv` directory keeps the environment inside the project root.
+### 1. Create and Activate Virtual Environment
 
-### macOS / Linux
-
-Create:
-
-```bash
-python3 -m venv .venv
-```
-
-Activate:
-
-```bash
-source .venv/bin/activate
-```
-
-### Windows (Command Prompt)
-
-Create:
-
+#### Windows (Command Prompt)
 ```cmd
 python -m venv .venv
-```
-
-Activate:
-
-```cmd
 .venv\Scripts\activate
 ```
 
-### Windows (PowerShell)
-
-Create:
-
+#### Windows (PowerShell)
 ```powershell
 python -m venv .venv
-```
-
-Activate:
-
-```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-If you receive an execution policy error in PowerShell, run (as administrator or for the current user):
-
+If you receive an execution policy error, run:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
+#### macOS / Linux
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
 ---
 
-## Setup
+## Running the Application
 
-1. Clone or download the repository:
+
+### Streamlit Web App
+```bash
+python launcher.py
+```
+
+Alternatively, run Streamlit directly:
+```bash
+streamlit run streamlit_app.py
+```
+
+---
+
+## Usage
+
+1. **Start the application** using one of the methods above
+2. **Adjust controls**:
+   - Speed slider to control animation speed
+   - Shape selector to change dot appearance
+   - Color pickers to customize dot and background colors
+3. **Exit**: Close the window or use the exit button (Streamlit app)
+
+---
+
+## Project Structure
+
+- `streamlit_app.py` - Web-based Streamlit interface with p5.js animation
+- `launcher.py` - Application launcher for Streamlit app with native window integration
+- `requirements.txt` - Python package dependencies
+- `app_icon.ico` - Application icon for compiled executables
+
+---
+
+## Building Standalone Executables
+
+To create a standalone `.exe` for Windows using PyInstaller:
 
 ```bash
 git clone https://github.com/talha-0/RandomMovingObj
+
 cd RandomMovingObj
+
+pyinstaller --onefile --noconsole --name "Random Moving Obj" --icon="app_icon.ico" --add-data "streamlit_app.py;." --copy-metadata streamlit --collect-all streamlit launcher.py
 ```
 
-2. Create and activate the `.venv` as shown above.
+The executable will be created in the `dist/` folder.
 
-3. Run the program:
+---
 
-```bash
-python main.py
-```
+## Deactivating Virtual Environment
 
-Replace `main.py` with your script filename if different.
-
-4. When finished, deactivate the virtual environment:
-
+When finished:
 ```bash
 deactivate
 ```
 
 ---
+
+## License
+
+This project is open source and available on [Github](https://github.com/talha-0/RandomMovingObj).
