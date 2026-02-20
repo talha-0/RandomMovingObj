@@ -113,6 +113,13 @@ pyinstaller --onefile --noconsole --name "Random Moving Obj" --icon="app_icon.ic
 
 The executable will be created in the `dist/` folder.
 
+To run Execute the following command:
+```bash
+& '.\dist\Random Moving Obj.exe'
+```
+
+Or open the file.
+
 ---
 
 ## Deactivating Virtual Environment
