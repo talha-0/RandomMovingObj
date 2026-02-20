@@ -52,30 +52,31 @@ html = r'''
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
     <style>
       /* full viewport fixed canvas inside the iframe */
-      html,body { height:100%; margin:0; background:#2b2b2b; }
+      html,body { height:100%; margin:0; background:#2b2b2b; transition: background 0.3s ease; }
       #sketch-holder {
         position: fixed; inset: 0;
         width: 100vw; height: 100vh;
-        background: #2b2b2b; z-index: 1;
+        z-index: 1;
       }
 
       /* transparent glass controls (auto-hide) */
       .controls {
         position: fixed;
-        right: 18px;
-        top: 18px;
-        width: 300px;
-        max-width: 40vw;
+        right: 20px;
+        top: 20px;
+        width: 320px;
+        max-width: 85vw;
         z-index: 9999;
-        padding: 12px;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.03); /* very transparent */
+        padding: 20px;
+        border-radius: 16px;
+        background: rgba(30, 30, 30, 0.4); /* Darker transparent base */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
         color: white;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-        backdrop-filter: blur(6px) saturate(120%);
-        -webkit-backdrop-filter: blur(6px) saturate(120%);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        backdrop-filter: blur(12px) saturate(150%);
+        -webkit-backdrop-filter: blur(12px) saturate(150%);
         font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        transition: opacity 300ms ease, transform 300ms ease;
+        transition: opacity 400ms ease, transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
         opacity: 1;
         pointer-events: auto;
       }
@@ -83,23 +84,60 @@ html = r'''
       /* hidden state (auto-hide) */
       .controls.hidden {
         opacity: 0;
-        transform: translateY(-8px);
+        transform: translateY(-10px) scale(0.98);
         pointer-events: none;
       }
 
-      .controls h3 { margin: 0 0 8px 0; font-size: 18px; color: #e9eef8; }
-      .control-row { display: flex; gap: 8px; align-items:center; margin: 8px 0; }
-      .control-row label { min-width: 90px; font-size: 13px; color:#d7e6ff; }
-      .control-row input[type="range"] { width: 100%; }
-      .btn-row { display:flex; gap:8px; margin-top:6px; }
-      button, select { border-radius:8px; padding:8px 10px; border: none; background: rgba(255,255,255,0.06); color: #eaf2ff; cursor:pointer; }
-      button.primary { background: linear-gradient(90deg,#27e58a,#0fb39b); color: #052018; font-weight:700; }
-      .small { font-size: 12px; padding:6px 8px; }
-      .checkbox-row { display:flex; align-items:center; gap:8px; color:#cfe8ff; font-size:13px; }
-      .footer-note { margin-top:8px; font-size:12px; color:#9fbfe6; opacity:0.9; }
+      .controls h3 { margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px; }
+      .control-row { display: flex; gap: 12px; align-items:center; margin: 12px 0; justify-content: space-between; }
+      .control-row label { min-width: 95px; font-size: 14px; font-weight: 500; color:#cdd9ed; }
+      .control-row input[type="range"] { flex-grow: 1; cursor: pointer; }
+      
+      .btn-row { display:flex; gap:8px; margin-bottom: 16px; }
+      button { 
+        flex: 1;
+        border-radius:8px; 
+        padding:10px 12px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        background: rgba(255,255,255,0.05); 
+        color: #eaf2ff; 
+        cursor:pointer; 
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      button:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+      button.primary { background: linear-gradient(135deg,#27e58a,#0fb39b); color: #052018; font-weight:700; border: none; }
+      button.primary:hover { box-shadow: 0 4px 12px rgba(39, 229, 138, 0.3); }
+      button.danger:hover { background: rgba(235, 87, 87, 0.8); color: white; border-color: transparent;}
+      
+      .checkbox-row { display:flex; align-items:center; justify-content: flex-start; gap:8px; color:#cfe8ff; font-size:14px; margin-top: 16px;}
+      .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #27e58a; }
+      
+      .footer-note { margin-top:16px; font-size:12px; color:#8fa8c7; opacity:0.8; line-height: 1.4; }
 
-      input[type="range"]::-webkit-slider-runnable-track { background: rgba(255,255,255,0.12); height:8px; border-radius:6px; }
-      input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 0 6px rgba(0,0,0,0.6); margin-top:-3px; }
+      /* Modern Range Slider */
+      input[type="range"] { -webkit-appearance: none; background: transparent; }
+      input[type="range"]::-webkit-slider-runnable-track { background: rgba(255,255,255,0.15); height:6px; border-radius:6px; }
+      input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#27e58a; box-shadow:0 0 8px rgba(0,0,0,0.4); margin-top:-5px; transition: transform 0.1s; }
+      input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+      /* Sleek Color Picker */
+      input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 0;
+        background: transparent;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+      input[type="color"]::-webkit-color-swatch {
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 8px;
+        box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+      }
 
       /* make sure body does not scroll inside iframe */
       body { overflow: hidden; }
@@ -110,14 +148,12 @@ html = r'''
     <div id="sketch-holder"></div>
 
     <div class="controls" id="controls" role="region" aria-label="Controls">
-      <h3>Controls</h3>
-      <div class="control-row">
-        <label>Animation</label>
-        <div style="display:flex; gap:8px;">
-          <button id="startBtn" class="small primary" aria-label="Start">Start</button>
-          <button id="stopBtn" class="small" aria-label="Stop">Stop</button>
-          <button id="resetBtn" class="small" aria-label="Reset">Reset</button>
-        </div>
+      <h3>Animation Settings</h3>
+      
+      <div class="btn-row">
+        <button id="startBtn" class="primary" aria-label="Start">Start</button>
+        <button id="stopBtn" class="danger" aria-label="Stop">Stop</button>
+        <button id="resetBtn" aria-label="Reset">Reset</button>
       </div>
 
       <div class="control-row">
@@ -136,22 +172,21 @@ html = r'''
       </div>
 
       <div class="control-row">
-        <label for="colorSelect">Color</label>
-        <select id="colorSelect" aria-label="Color">
-          <option value="cyan">Cyan</option>
-          <option value="#ff5555">Red</option>
-          <option value="#50fa8b">Green</option>
-          <option value="#f1fa8c">Yellow</option>
-          <option value="white">White</option>
-        </select>
+        <label for="dotColor">Dot Color</label>
+        <input type="color" id="dotColor" value="#00ffff" aria-label="Dot Color">
+      </div>
+      
+      <div class="control-row">
+        <label for="bgColor">Background</label>
+        <input type="color" id="bgColor" value="#2b2b2b" aria-label="Background Color">
       </div>
 
       <div class="control-row checkbox-row">
         <input id="showBoundary" type="checkbox" checked aria-label="Show Boundary">
-        <label for="showBoundary">Show boundary</label>
+        <label for="showBoundary">Show boundaries</label>
       </div>
 
-      <div class="footer-note">Tip: When the dot reaches the edge it pauses, then continues in a random direction.</div>
+      <div class="footer-note">Tip: The menu auto-hides. Move your mouse to reveal it. When the dot reaches the edge it pauses, then continues in a random direction.</div>
     </div>
 
     <script>
@@ -160,7 +195,8 @@ html = r'''
         speed: 3,
         dot_size: 12,
         pause_ms: 350,
-        color: 'cyan',
+        color: '#00ffff',
+        bg_color: '#2b2b2b',
         show_boundary: true
       };
 
@@ -218,16 +254,10 @@ html = r'''
         dot.y = centerY + relY;
       }
 
-      /* OLD bounce logic (commented out)
-      function bounceIfNeeded() {
-        ...
-      }
-      */
-
       function drawBoundary() {
         if (!config.show_boundary) return;
         push();
-        stroke(255, 200);
+        stroke(255, 120);
         strokeWeight(1.5);
         noFill();
         const maxX = canvasW/2 - margin;
@@ -238,7 +268,7 @@ html = r'''
       }
 
       function draw() {
-        background('#2b2b2b');
+        background(config.bg_color);
         canvasW = windowWidth;
         canvasH = windowHeight;
 
@@ -279,10 +309,7 @@ html = r'''
         dot.y = centerY + relY;
 
         if (hitEdge) {
-          // NEW BEHAVIOR:
-          // - Do NOT stop the animation permanently.
-          // - Set remaining=0 so the pickNewMovement() branch will run after the pause.
-          // - Set pausedUntil so we wait for the configured pause_ms before moving again.
+          // NEW BEHAVIOR: Set remaining=0 so the pickNewMovement() branch will run after the pause.
           dot.remaining = 0;
           dot.pausedUntil = millis() + config.pause_ms;
         }
@@ -307,7 +334,8 @@ html = r'''
         const speedRange = document.getElementById('speedRange');
         const sizeRange = document.getElementById('sizeRange');
         const pauseRange = document.getElementById('pauseRange');
-        const colorSelect = document.getElementById('colorSelect');
+        const dotColorInput = document.getElementById('dotColor');
+        const bgColorInput = document.getElementById('bgColor');
         const showBoundary = document.getElementById('showBoundary');
         const controlsEl = document.getElementById('controls');
 
@@ -318,12 +346,18 @@ html = r'''
         speedRange.oninput = (e) => { config.speed = parseFloat(e.target.value); };
         sizeRange.oninput = (e) => { config.dot_size = parseInt(e.target.value); };
         pauseRange.oninput = (e) => { config.pause_ms = parseInt(e.target.value); };
-        colorSelect.onchange = (e) => { config.color = e.target.value; };
+        
+        dotColorInput.oninput = (e) => { config.color = e.target.value; };
+        bgColorInput.oninput = (e) => { 
+            config.bg_color = e.target.value; 
+            document.body.style.background = config.bg_color; // Sync HTML body color
+        };
+        
         showBoundary.onchange = (e) => { config.show_boundary = e.target.checked; };
 
-        // auto-hide controls after idle (2.2s) and re-show on mouse movement/touch
+        // auto-hide controls after idle (2.5s) and re-show on mouse movement/touch
         let hideTimer = null;
-        const hideDelay = 2200;
+        const hideDelay = 2500;
 
         function scheduleHide() {
           if (hideTimer) clearTimeout(hideTimer);
@@ -340,13 +374,6 @@ html = r'''
         // show initially then hide after delay
         scheduleHide();
       });
-
-      // defaults
-      config.speed = 3;
-      config.dot_size = 12;
-      config.pause_ms = 350;
-      config.color = 'cyan';
-      config.show_boundary = true;
     </script>
   </body>
 </html>
